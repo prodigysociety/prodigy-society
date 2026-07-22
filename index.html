@@ -162,11 +162,11 @@
         <nav class="hidden md:flex items-center gap-8 font-semibold text-sm">
             <a href="#home" class="hover:text-primary transition">Home</a>
             <a href="#about" class="hover:text-primary transition">About</a>
+            <a href="#patrons" class="hover:text-primary transition">Advisors</a>
             <a href="#members" class="hover:text-primary transition">Members</a>
             <a href="#events" class="hover:text-primary transition">Events</a>
             <a href="#gallery" class="hover:text-primary transition">Gallery</a>
             <a href="#contact" class="hover:text-primary transition">Contact</a>
-            <button onclick="toggleAdminModal()" class="px-5 py-2 bg-gradient-to-r from-accent to-secondary text-white rounded-full font-bold shadow-[0_0_15px_#FF4D8D] hover:scale-105 transition"><i class="fa-solid fa-lock mr-2"></i>Admin Panel</button>
         </nav>
     </header>
 
@@ -235,6 +235,18 @@
         </div>
     </section>
 
+    <!-- 👨‍🏫 PATRONS & TEACHER ADVISORS ("RESPECTIVE SIRS") SECTION -->
+    <section id="patrons" class="py-20 px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="font-heading text-4xl font-extrabold uppercase tracking-wider">Faculty Patrons & Advisors</h2>
+            <p class="text-gray-400 mt-2">Guiding and Mentoring Prodigy Society at Tilottama Campus</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="patrons-grid">
+            <!-- Dynamic Patron / Teacher Advisor Cards loaded via JS -->
+        </div>
+    </section>
+
     <!-- 👥 MEMBERS SECTION -->
     <section id="members" class="py-20 px-6 max-w-7xl mx-auto">
         <div class="text-center mb-10">
@@ -300,15 +312,15 @@
                 <h3 class="font-heading text-2xl font-bold mb-4">Send a Message</h3>
                 <div>
                     <label class="text-xs text-gray-400">Your Name</label>
-                    <input type="text" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-primary">
+                    <input type="text" id="contact-sender-name" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-primary">
                 </div>
                 <div>
                     <label class="text-xs text-gray-400">Your Email</label>
-                    <input type="email" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-primary">
+                    <input type="email" id="contact-sender-email" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-primary">
                 </div>
                 <div>
                     <label class="text-xs text-gray-400">Message</label>
-                    <textarea rows="4" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-primary"></textarea>
+                    <textarea id="contact-sender-msg" rows="4" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-primary"></textarea>
                 </div>
                 <button type="submit" class="neon-btn w-full text-center mt-2">Send Message</button>
             </form>
@@ -331,10 +343,10 @@
         <img id="lightbox-img" src="" class="max-w-full max-h-full rounded-2xl border border-white/20">
     </div>
 
-    <!-- ADMIN PANEL MODAL -->
+    <!-- HIDDEN ADMIN PANEL MODAL (Only accessed via URL #admin or Ctrl+Shift+A) -->
     <div id="admin-modal" class="fixed inset-0 bg-black/90 z-50 hidden justify-center items-center p-4 overflow-y-auto">
         <div class="glass-card w-full max-w-4xl p-8 rounded-3xl relative my-8">
-            <span class="absolute top-6 right-8 text-white text-3xl cursor-pointer" onclick="toggleAdminModal()">&times;</span>
+            <span class="absolute top-6 right-8 text-white text-3xl cursor-pointer" onclick="closeAdminModal()">&times;</span>
             
             <!-- Login State -->
             <div id="admin-login-view" class="max-w-md mx-auto text-center py-8">
@@ -354,15 +366,34 @@
                 </div>
 
                 <!-- Admin Tabs -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
-                    <button onclick="switchAdminTab('members')" class="p-2 glass-card rounded-lg text-sm font-bold text-primary">Members</button>
-                    <button onclick="switchAdminTab('events')" class="p-2 glass-card rounded-lg text-sm font-bold text-primary">Events</button>
-                    <button onclick="switchAdminTab('gallery')" class="p-2 glass-card rounded-lg text-sm font-bold text-primary">Gallery</button>
-                    <button onclick="switchAdminTab('settings')" class="p-2 glass-card rounded-lg text-sm font-bold text-primary">Settings</button>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-6">
+                    <button onclick="switchAdminTab('patrons')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Patrons/Sirs</button>
+                    <button onclick="switchAdminTab('members')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Members</button>
+                    <button onclick="switchAdminTab('events')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Events</button>
+                    <button onclick="switchAdminTab('gallery')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Gallery</button>
+                    <button onclick="switchAdminTab('inbox')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Messages Inbox</button>
                 </div>
 
-                <!-- Tab: Add Member -->
-                <div id="admin-tab-members" class="admin-tab space-y-4">
+                <!-- Tab: Add Patron -->
+                <div id="admin-tab-patrons" class="admin-tab space-y-4">
+                    <h3 class="font-bold">Add Patron / Faculty Advisor ("Respective Sir")</h3>
+                    <form onsubmit="adminAddPatron(event)" class="space-y-3">
+                        <input type="text" id="p-name" placeholder="Full Name (e.g. Er. Firstname Lastname)" required class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        <input type="text" id="p-designation" placeholder="Designation (e.g. Campus Chief / HOD IT)" required class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        <textarea id="p-msg" placeholder="Message / Guidance Quote" rows="2" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm"></textarea>
+                        
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400">Photo</label>
+                            <input type="file" id="p-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
+                            <input type="url" id="p-photo" placeholder="Or enter Photo URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-primary text-black font-bold rounded-xl">Publish Advisor Profile</button>
+                    </form>
+                </div>
+
+                <!-- Tab: Add Board Member -->
+                <div id="admin-tab-members" class="admin-tab hidden space-y-4">
                     <h3 class="font-bold">Add Board Member</h3>
                     <form onsubmit="adminAddMember(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="text" id="m-name" placeholder="Full Name" required class="p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
@@ -379,7 +410,6 @@
                             <option value="Media">Media</option>
                         </select>
                         
-                        <!-- Image File Upload Option -->
                         <div class="col-span-full space-y-2">
                             <label class="text-xs text-gray-400">Member Photo (Upload Image File or enter URL below)</label>
                             <input type="file" id="m-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
@@ -400,7 +430,6 @@
                             <input type="text" id="e-venue" placeholder="Venue" required class="p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
                         </div>
                         
-                        <!-- Event Image Upload Option -->
                         <div class="space-y-2">
                             <label class="text-xs text-gray-400">Event Cover Image (Upload Image File or enter URL below)</label>
                             <input type="file" id="e-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
@@ -426,24 +455,12 @@
                     </form>
                 </div>
 
-                <!-- Tab: Settings -->
-                <div id="admin-tab-settings" class="admin-tab hidden space-y-4">
-                    <h3 class="font-bold">Change Website Background & Logo</h3>
-                    <form onsubmit="adminUpdateTheme(event)" class="space-y-4">
-                        <div class="space-y-2">
-                            <label class="text-xs text-gray-400">Upload New Campus Background Image</label>
-                            <input type="file" id="bg-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
-                            <input type="text" id="bg-url-input" value="tilottama-campus-building.webp" placeholder="Or enter Background Image URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label class="text-xs text-gray-400">Upload New Society Logo Image</label>
-                            <input type="file" id="logo-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
-                            <input type="text" id="logo-url-input" value="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" placeholder="Or enter Logo Image URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
-                        </div>
-
-                        <button type="submit" class="w-full py-3 bg-accent text-white font-bold rounded-xl">Apply Theme Updates</button>
-                    </form>
+                <!-- Tab: Messages Inbox -->
+                <div id="admin-tab-inbox" class="admin-tab hidden space-y-4">
+                    <h3 class="font-bold">Contact Messages Inbox</h3>
+                    <div id="inbox-messages-list" class="space-y-3 max-h-80 overflow-y-auto">
+                        <p class="text-gray-400 text-sm italic">No messages received yet.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -465,12 +482,18 @@
         // Cursor Glow Engine
         document.addEventListener('mousemove', (e) => {
             const glow = document.getElementById('cursor-glow');
-            glow.style.left = e.clientX + 'px';
-            glow.style.top = e.clientY + 'px';
+            if (glow) {
+                glow.style.left = e.clientX + 'px';
+                glow.style.top = e.clientY + 'px';
+            }
         });
 
         // Initial Data Store
         let state = {
+            patrons: [
+                { name: "Campus Chief / Director", designation: "Faculty Patron", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400", msg: "Guiding student excellence and technical initiative." },
+                { name: "HOD IT Department", designation: "Teacher Advisor", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400", msg: "Fostering academic innovation and practical development." }
+            ],
             members: [
                 { name: "Executive President", role: "President", dept: "Executive", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400" },
                 { name: "Executive Vice President", role: "Vice President", dept: "Executive", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" },
@@ -486,7 +509,8 @@
                 { url: "tilottama-campus-building.webp", title: "Tilottama Campus View" },
                 { url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800", title: "Student Excellence Meeting" },
                 { url: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=800", title: "Tech Workshop" }
-            ]
+            ],
+            messages: []
         };
 
         // Window Loader Init
@@ -497,11 +521,24 @@
             initThreeJS();
             renderAll();
             initCounters();
+
+            // Secret URL Hash Detector (#admin)
+            if (window.location.hash === '#admin') {
+                openAdminModal();
+            }
+        });
+
+        // Secret Shortcut Key Trigger: Ctrl + Shift + A
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                openAdminModal();
+            }
         });
 
         // Three.js Particle Background
         function initThreeJS() {
             const canvas = document.getElementById('bg-canvas');
+            if (!canvas) return;
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
@@ -539,13 +576,29 @@
 
         // Render Functions
         function renderAll() {
+            renderPatrons();
             renderMembers(state.members);
             renderEvents();
             renderGallery();
         }
 
+        function renderPatrons() {
+            const grid = document.getElementById('patrons-grid');
+            if (!grid) return;
+            grid.innerHTML = state.patrons.map(p => `
+                <div class="glass-card p-6 rounded-3xl text-center border-accent/30" data-tilt>
+                    <img src="${p.photo}" alt="${p.name}" class="w-32 h-32 mx-auto rounded-full object-cover border-2 border-accent shadow-[0_0_20px_#FF4D8D] mb-4">
+                    <span class="text-xs text-primary font-extrabold uppercase tracking-widest">${p.designation}</span>
+                    <h3 class="font-heading text-xl font-bold mt-1">${p.name}</h3>
+                    <p class="text-gray-300 text-xs italic mt-2">"${p.msg}"</p>
+                </div>
+            `).join('');
+            VanillaTilt.init(document.querySelectorAll('[data-tilt]'));
+        }
+
         function renderMembers(list) {
             const grid = document.getElementById('members-grid');
+            if (!grid) return;
             grid.innerHTML = list.map(m => `
                 <div class="glass-card p-6 rounded-3xl text-center" data-tilt>
                     <img src="${m.photo}" alt="${m.name}" class="w-28 h-28 mx-auto rounded-full object-cover border-2 border-primary shadow-[0_0_15px_#00E5FF] mb-4">
@@ -571,6 +624,7 @@
 
         function renderEvents() {
             const grid = document.getElementById('events-grid');
+            if (!grid) return;
             grid.innerHTML = state.events.map(e => `
                 <div class="glass-card rounded-3xl overflow-hidden flex flex-col md:flex-row">
                     <img src="${e.photo}" class="w-full md:w-48 h-48 object-cover">
@@ -587,6 +641,7 @@
 
         function renderGallery() {
             const grid = document.getElementById('gallery-grid');
+            if (!grid) return;
             grid.innerHTML = state.gallery.map(g => `
                 <div class="masonry-item glass-card rounded-2xl overflow-hidden group cursor-pointer" onclick="openLightbox('${g.url}')">
                     <img src="${g.url}" class="w-full object-cover group-hover:scale-105 transition duration-500">
@@ -595,7 +650,7 @@
             `).join('');
         }
 
-        // Helper to Convert File Upload to Base64 Image String
+        // Convert File Uploads to Base64
         function getFileData(fileInput, fallbackUrl) {
             return new Promise((resolve) => {
                 if (fileInput.files && fileInput.files[0]) {
@@ -635,16 +690,23 @@
 
         // Admin Engine
         function toggleAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            modal.classList.toggle('hidden');
-            modal.classList.toggle('flex');
+            openAdminModal();
         }
 
-        if (window.location.hash === '#admin') toggleAdminModal();
+        function openAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
 
         function handleAdminLogin(e) {
             e.preventDefault();
-            // Secured Password
             if (document.getElementById('admin-user').value === 'admin' && document.getElementById('admin-pass').value === 'Prodigy@2083') {
                 document.getElementById('admin-login-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
@@ -659,6 +721,22 @@
         function switchAdminTab(tab) {
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
             document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+        }
+
+        async function adminAddPatron(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('p-file');
+            const urlInput = document.getElementById('p-photo').value;
+            const photoSrc = await getFileData(fileInput, urlInput || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400');
+
+            state.patrons.push({
+                name: document.getElementById('p-name').value,
+                designation: document.getElementById('p-designation').value,
+                msg: document.getElementById('p-msg').value,
+                photo: photoSrc
+            });
+            renderPatrons();
+            alert('Faculty Advisor Profile Published!');
         }
 
         async function adminAddMember(e) {
@@ -708,27 +786,25 @@
             alert('Photo Added to Gallery!');
         }
 
-        async function adminUpdateTheme(e) {
-            e.preventDefault();
-            const bgFileInput = document.getElementById('bg-file');
-            const bgUrlInput = document.getElementById('bg-url-input').value;
-            const bgSrc = await getFileData(bgFileInput, bgUrlInput);
-
-            const logoFileInput = document.getElementById('logo-file');
-            const logoUrlInput = document.getElementById('logo-url-input').value;
-            const logoSrc = await getFileData(logoFileInput, logoUrlInput);
-
-            // Update Background & Logos
-            document.getElementById('campus-bg').style.backgroundImage = `url('${bgSrc}')`;
-            document.getElementById('nav-logo-img').src = logoSrc;
-            document.getElementById('hero-logo-img').src = logoSrc;
-
-            alert('Theme & Logos Updated Successfully!');
-        }
-
         function handleContactSubmit(e) {
             e.preventDefault();
-            alert('Thank you! Your message has been received.');
+            const name = document.getElementById('contact-sender-name').value;
+            const email = document.getElementById('contact-sender-email').value;
+            const msg = document.getElementById('contact-sender-msg').value;
+
+            state.messages.push({ name, email, msg });
+
+            const inboxList = document.getElementById('inbox-messages-list');
+            if (inboxList) {
+                inboxList.innerHTML = state.messages.map(m => `
+                    <div class="glass-card p-3 rounded-xl border-primary/20">
+                        <p class="text-xs text-primary font-bold">${m.name} (${m.email})</p>
+                        <p class="text-sm text-gray-300 mt-1">${m.msg}</p>
+                    </div>
+                `).join('');
+            }
+
+            alert('Thank you! Your message has been sent to society executives.');
         }
     </script>
 </body>

@@ -156,7 +156,7 @@
     <!-- Glassmorphism Navbar -->
     <header class="fixed top-0 left-0 w-full z-50 px-6 py-4 glass-card border-b border-white/10 flex justify-between items-center">
         <a href="#home" class="flex items-center gap-3">
-            <img id="nav-logo-img" src="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" alt="Logo" class="w-12 h-12 rounded-full border-2 border-primary shadow-[0_0_15px_#00E5FF] object-cover">
+            <img class="dynamic-logo w-12 h-12 rounded-full border-2 border-primary shadow-[0_0_15px_#00E5FF] object-cover" src="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" alt="Logo">
             <span class="font-heading text-xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-primary to-secondary">PRODIGY SOCIETY</span>
         </a>
         <nav class="hidden md:flex items-center gap-8 font-semibold text-sm">
@@ -172,7 +172,7 @@
 
     <!-- 🏠 HOME: Fullscreen Hero Section -->
     <section id="home" class="min-h-screen flex flex-col justify-center items-center text-center px-4 pt-24 relative">
-        <img id="hero-logo-img" src="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" alt="3D Logo" class="w-36 h-36 rounded-full border-4 border-primary shadow-[0_0_30px_#00E5FF] mb-6 animate-bounce object-cover">
+        <img class="dynamic-logo w-36 h-36 rounded-full border-4 border-primary shadow-[0_0_30px_#00E5FF] mb-6 animate-bounce object-cover" src="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" alt="Logo">
         
         <h1 class="font-heading text-5xl md:text-7xl font-extrabold tracking-tight uppercase max-w-5xl bg-clip-text text-transparent bg-gradient-to-r from-white via-primary to-accent">
             <span id="typing-text"></span>
@@ -330,7 +330,7 @@
     <!-- FOOTER -->
     <footer class="py-12 border-t border-white/10 text-center text-gray-400 text-sm">
         <div class="flex justify-center items-center gap-3 mb-4">
-            <img src="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" alt="Logo" class="w-8 h-8 rounded-full">
+            <img class="dynamic-logo w-8 h-8 rounded-full object-cover" src="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" alt="Logo">
             <span class="font-heading text-lg font-bold text-white">PRODIGY SOCIETY</span>
         </div>
         <p class="mb-2">Tilottama College • Tilottama-2, Yogikuti, Rupandehi, Nepal</p>
@@ -366,12 +366,13 @@
                 </div>
 
                 <!-- Admin Tabs -->
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-6">
                     <button onclick="switchAdminTab('patrons')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Patrons/Sirs</button>
                     <button onclick="switchAdminTab('members')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Members</button>
                     <button onclick="switchAdminTab('events')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Events</button>
                     <button onclick="switchAdminTab('gallery')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Gallery</button>
-                    <button onclick="switchAdminTab('inbox')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Messages Inbox</button>
+                    <button onclick="switchAdminTab('settings')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Theme/Logo</button>
+                    <button onclick="switchAdminTab('inbox')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Inbox</button>
                 </div>
 
                 <!-- Tab: Manage Patrons -->
@@ -469,6 +470,26 @@
                     <hr class="border-white/10 my-4">
                     <h4 class="font-bold text-xs text-gray-400 uppercase tracking-wider">Existing Gallery Photos</h4>
                     <div id="admin-manage-gallery" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                </div>
+
+                <!-- Tab: Settings (Theme & Logo) -->
+                <div id="admin-tab-settings" class="admin-tab hidden space-y-4">
+                    <h3 class="font-bold">Change Website Background & Logo</h3>
+                    <form onsubmit="adminUpdateTheme(event)" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400">Upload New Campus Background Image</label>
+                            <input type="file" id="bg-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
+                            <input type="text" id="bg-url-input" value="tilottama-campus-building.webp" placeholder="Or enter Background Image URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400">Upload New Society Logo Image</label>
+                            <input type="file" id="logo-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
+                            <input type="text" id="logo-url-input" value="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" placeholder="Or enter Logo Image URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-accent text-white font-bold rounded-xl">Apply Theme Updates</button>
+                    </form>
                 </div>
 
                 <!-- Tab: Messages Inbox -->
@@ -669,7 +690,6 @@
 
         // Render Admin Management & Deletion Lists inside Dashboard
         function renderAdminManagementLists() {
-            // Patrons List
             const pList = document.getElementById('admin-manage-patrons');
             if (pList) {
                 pList.innerHTML = state.patrons.length ? state.patrons.map((p, i) => `
@@ -680,7 +700,6 @@
                 `).join('') : '<p class="text-xs text-gray-400 italic">No advisors present.</p>';
             }
 
-            // Members List
             const mList = document.getElementById('admin-manage-members');
             if (mList) {
                 mList.innerHTML = state.members.length ? state.members.map((m, i) => `
@@ -691,7 +710,6 @@
                 `).join('') : '<p class="text-xs text-gray-400 italic">No members present.</p>';
             }
 
-            // Events List
             const eList = document.getElementById('admin-manage-events');
             if (eList) {
                 eList.innerHTML = state.events.length ? state.events.map((e, i) => `
@@ -702,7 +720,6 @@
                 `).join('') : '<p class="text-xs text-gray-400 italic">No events present.</p>';
             }
 
-            // Gallery List
             const gList = document.getElementById('admin-manage-gallery');
             if (gList) {
                 gList.innerHTML = state.gallery.length ? state.gallery.map((g, i) => `
@@ -754,6 +771,28 @@
                     resolve(fallbackUrl);
                 }
             });
+        }
+
+        // Theme and Logo Update Handler
+        async function adminUpdateTheme(e) {
+            e.preventDefault();
+            const bgFileInput = document.getElementById('bg-file');
+            const bgUrlInput = document.getElementById('bg-url-input').value;
+            const newBg = await getFileData(bgFileInput, bgUrlInput);
+
+            const logoFileInput = document.getElementById('logo-file');
+            const logoUrlInput = document.getElementById('logo-url-input').value;
+            const newLogo = await getFileData(logoFileInput, logoUrlInput);
+
+            // Update Background
+            document.getElementById('campus-bg').style.backgroundImage = `url('${newBg}')`;
+
+            // Update Logo Everywhere
+            document.querySelectorAll('.dynamic-logo').forEach(img => {
+                img.src = newLogo;
+            });
+
+            alert('Theme & Logo updated successfully!');
         }
 
         // Lightbox

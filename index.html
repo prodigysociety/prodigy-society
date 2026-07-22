@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRODIGY SOCIETY | Tilottama College</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#050816',
+                        primary: '#00E5FF',
+                        secondary: '#6C63FF',
+                        accent: '#FF4D8D',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        heading: ['Space Grotesk', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Libraries: Three.js, GSAP, VanillaTilt -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+
+    <style>
+        body {
+            background-color: #050816;
+            color: #ffffff;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            transition: all 0.4s ease;
+        }
+        .glass-card:hover {
+            border-color: #00E5FF;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.25);
+        }
+
+        /* Cursor Glow Effect */
+        #cursor-glow {
+            position: fixed;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 229, 255, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        /* Custom Animated Buttons */
+        .neon-btn {
+            padding: 14px 36px;
+            background: #00E5FF;
+            color: #050816;
+            font-weight: 800;
+            border-radius: 50px;
+            box-shadow: 0 0 20px cyan;
+            transition: .4s;
+            display: inline-block;
+        }
+        .neon-btn:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 0 40px cyan;
+        }
+
+        .btn-3d {
+            background: linear-gradient(135deg, #6C63FF, #FF4D8D);
+            border-bottom: 4px solid #4a40d4;
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+        .btn-3d:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+
+        .liquid-btn {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            transition: 0.4s;
+            z-index: 1;
+        }
+        .liquid-btn::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #00E5FF, #6C63FF);
+            transition: 0.5s ease;
+            z-index: -1;
+            border-radius: 50% 50% 0 0;
+        }
+        .liquid-btn:hover::before {
+            top: 0;
+            border-radius: 0;
+        }
+
+        /* Masonry Gallery */
+        .masonry { column-count: 3; column-gap: 1.5rem; }
+        @media(max-width: 768px) { .masonry { column-count: 1; } }
+        .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
+
+        /* Loader */
+        #loader {
+            position: fixed; inset: 0; background: #050816; z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .spinner { width: 60px; height: 60px; border: 4px solid rgba(0,229,255,0.1); border-top-color: #00E5FF; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Cursor Glow -->
+    <div id="cursor-glow"></div>
+
+    <!-- AI Loading Screen -->
+    <div id="loader">
+        <div class="spinner mb-4"></div>
+        <div class="font-heading text-2xl font-bold tracking-widest text-primary animate-pulse">PRODIGY SOCIETY</div>
+        <div class="text-xs text-gray-400 mt-2">Tilottama Campus • Loading 3D Visual Engine...</div>
+    </div>
+
+    <!-- Background Three.js Canvas -->
+    <canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full -z-20 pointer-events-none"></canvas>
+
+    <!-- Campus Background Overlay -->
+    <div id="campus-bg" class="fixed top-0 left-0 w-full h-full -z-10 opacity-20 bg-cover bg-center transition-all duration-700 pointer-events-none" style="background-image: url('tilottama-campus-building.webp'); filter: blur(3px);"></div>
+
+    <!-- Glassmorphism Navbar -->
+    <header class="fixed top-0 left-0 w-full z-50 px-6 py-4 glass-card border-b border-white/10 flex justify-between items-center">
+        <a href="#home" class="flex items-center gap-3">
+            <img id="nav-logo-img" src="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" alt="Logo" class="w-12 h-12 rounded-full border-2 border-primary shadow-[0_0_15px_#00E5FF] object-cover">
+            <span class="font-heading text-xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-primary to-secondary">PRODIGY SOCIETY</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-8 font-semibold text-sm">
+            <a href="#home" class="hover:text-primary transition">Home</a>
+            <a href="#about" class="hover:text-primary transition">About</a>
+            <a href="#members" class="hover:text-primary transition">Members</a>
+            <a href="#events" class="hover:text-primary transition">Events</a>
+            <a href="#gallery" class="hover:text-primary transition">Gallery</a>
+            <a href="#contact" class="hover:text-primary transition">Contact</a>
+            <button onclick="toggleAdminModal()" class="px-5 py-2 bg-gradient-to-r from-accent to-secondary text-white rounded-full font-bold shadow-[0_0_15px_#FF4D8D] hover:scale-105 transition"><i class="fa-solid fa-lock mr-2"></i>Admin Panel</button>
+        </nav>
+    </header>
+
+    <!-- 🏠 HOME: Fullscreen Hero Section -->
+    <section id="home" class="min-h-screen flex flex-col justify-center items-center text-center px-4 pt-24 relative">
+        <img id="hero-logo-img" src="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" alt="3D Logo" class="w-36 h-36 rounded-full border-4 border-primary shadow-[0_0_30px_#00E5FF] mb-6 animate-bounce object-cover">
+        
+        <h1 class="font-heading text-5xl md:text-7xl font-extrabold tracking-tight uppercase max-w-5xl bg-clip-text text-transparent bg-gradient-to-r from-white via-primary to-accent">
+            <span id="typing-text"></span>
+        </h1>
+        
+        <p class="text-primary font-semibold text-xl md:text-2xl mt-4 tracking-widest uppercase">Tilottama College • Tilottama Campus</p>
+        <p class="text-gray-400 text-sm mt-2">Tilottama-2, Yogikuti, Rupandehi, Nepal</p>
+
+        <!-- Dynamic Action Buttons -->
+        <div class="flex flex-wrap justify-center gap-6 mt-10">
+            <a href="#contact" class="neon-btn">Join Society</a>
+            <a href="#members" class="btn-3d px-8 py-3.5 rounded-full font-bold text-white">Meet Team</a>
+            <a href="#events" class="liquid-btn px-8 py-3.5 glass-card rounded-full font-bold text-white border border-primary/40">Explore Events</a>
+        </div>
+
+        <!-- Floating Icons / Shapes Effect -->
+        <div class="absolute bottom-10 left-10 text-primary/30 text-4xl animate-pulse"><i class="fa-solid fa-cube"></i></div>
+        <div class="absolute top-32 right-12 text-secondary/30 text-4xl animate-bounce"><i class="fa-solid fa-atom"></i></div>
+    </section>
+
+    <!-- 👨‍💻 ABOUT SECTION -->
+    <section id="about" class="py-24 px-6 md:px-16 max-w-6xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="font-heading text-4xl font-extrabold uppercase tracking-wider">About Prodigy Society</h2>
+            <p class="text-gray-400 mt-2">Fostering Innovation, Leadership & Academic Excellence</p>
+        </div>
+
+        <!-- Mission & Vision Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <div class="glass-card p-8 rounded-3xl" data-tilt>
+                <div class="text-primary text-3xl mb-4"><i class="fa-solid fa-bullseye"></i></div>
+                <h3 class="font-heading text-2xl font-bold mb-2">Our Mission</h3>
+                <p class="text-gray-300 text-sm leading-relaxed">To empower students of Tilottama Campus through real-world tech exposure, executive workshops, and dynamic community events.</p>
+            </div>
+            <div class="glass-card p-8 rounded-3xl" data-tilt>
+                <div class="text-accent text-3xl mb-4"><i class="fa-solid fa-eye"></i></div>
+                <h3 class="font-heading text-2xl font-bold mb-2">Our Vision</h3>
+                <p class="text-gray-300 text-sm leading-relaxed">Building a tech-forward platform that prepares student prodigies to lead technical and executive fields globally.</p>
+            </div>
+        </div>
+
+        <!-- Statistics Counter -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="glass-card p-6 rounded-2xl text-center">
+                <div class="font-heading text-4xl font-extrabold text-primary counter" data-target="500">0</div>
+                <div class="text-xs text-gray-400 uppercase mt-2">Active Members</div>
+            </div>
+            <div class="glass-card p-6 rounded-2xl text-center">
+                <div class="font-heading text-4xl font-extrabold text-accent counter" data-target="25">0</div>
+                <div class="text-xs text-gray-400 uppercase mt-2">Events Organized</div>
+            </div>
+            <div class="glass-card p-6 rounded-2xl text-center">
+                <div class="font-heading text-4xl font-extrabold text-secondary counter" data-target="10">0</div>
+                <div class="text-xs text-gray-400 uppercase mt-2">Executive Roles</div>
+            </div>
+            <div class="glass-card p-6 rounded-2xl text-center">
+                <div class="font-heading text-4xl font-extrabold text-primary counter" data-target="2083">0</div>
+                <div class="text-xs text-gray-400 uppercase mt-2">Established B.S.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 👥 MEMBERS SECTION -->
+    <section id="members" class="py-20 px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-10">
+            <h2 class="font-heading text-4xl font-extrabold uppercase tracking-wider">Executive Committee</h2>
+            <p class="text-gray-400 mt-2">Meet the leadership team behind Prodigy Society</p>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-10 max-w-3xl mx-auto">
+            <input type="text" id="member-search" oninput="filterMembers()" placeholder="Search member by name or role..." class="w-full md:w-2/3 p-3 rounded-full bg-black/40 border border-white/10 text-white outline-none focus:border-primary px-6">
+            <select id="department-filter" onchange="filterMembers()" class="w-full md:w-1/3 p-3 rounded-full bg-black/40 border border-white/10 text-white outline-none focus:border-primary px-6">
+                <option value="ALL">All Departments</option>
+                <option value="Executive">Executive Board</option>
+                <option value="Technical">Technical & IT</option>
+                <option value="Media">Media & Graphics</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="members-grid">
+            <!-- Dynamic Member Cards loaded via JS -->
+        </div>
+    </section>
+
+    <!-- 🎉 EVENTS SECTION -->
+    <section id="events" class="py-20 px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="font-heading text-4xl font-extrabold uppercase tracking-wider">Events & Workshops</h2>
+            <p class="text-gray-400 mt-2">Participate in our campus events and hackathons</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="events-grid">
+            <!-- Dynamic Events loaded via JS -->
+        </div>
+    </section>
+
+    <!-- 📸 GALLERY SECTION -->
+    <section id="gallery" class="py-20 px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="font-heading text-4xl font-extrabold uppercase tracking-wider">Photo Collection</h2>
+            <p class="text-gray-400 mt-2">Capturing moments at Tilottama Campus</p>
+        </div>
+        <div class="masonry" id="gallery-grid">
+            <!-- Dynamic Masonry Gallery loaded via JS -->
+        </div>
+    </section>
+
+    <!-- 📞 CONTACT SECTION -->
+    <section id="contact" class="py-20 px-6 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 glass-card p-10 rounded-3xl">
+            <div>
+                <h2 class="font-heading text-3xl font-bold uppercase mb-6">Contact Us</h2>
+                <div class="space-y-4 text-gray-300 mb-8">
+                    <p class="flex items-center gap-4"><i class="fa-solid fa-graduation-cap text-primary text-xl"></i> Tilottama College (Tilottama Campus)</p>
+                    <p class="flex items-center gap-4"><i class="fa-solid fa-location-dot text-accent text-xl"></i> Tilottama-2, Yogikuti, Rupandehi, Nepal</p>
+                    <p class="flex items-center gap-4"><i class="fa-solid fa-envelope text-primary text-xl"></i> <a href="mailto:drewthecrewttc@gmail.com" class="underline">drewthecrewttc@gmail.com</a></p>
+                </div>
+
+                <!-- Google Maps Embed -->
+                <iframe class="w-full h-64 rounded-2xl border border-white/10" src="https://maps.google.com/maps?q=Tilottama%20Campus%20Yogikuti%20Rupandehi&t=&z=15&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no"></iframe>
+            </div>
+
+            <!-- Contact Form -->
+            <form class="space-y-4" onsubmit="handleContactSubmit(event)">
+                <h3 class="font-heading text-2xl font-bold mb-4">Send a Message</h3>
+                <div>
+                    <label class="text-xs text-gray-400">Your Name</label>
+                    <input type="text" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-primary">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400">Your Email</label>
+                    <input type="email" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-primary">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400">Message</label>
+                    <textarea rows="4" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-primary"></textarea>
+                </div>
+                <button type="submit" class="neon-btn w-full text-center mt-2">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-12 border-t border-white/10 text-center text-gray-400 text-sm">
+        <div class="flex justify-center items-center gap-3 mb-4">
+            <img src="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" alt="Logo" class="w-8 h-8 rounded-full">
+            <span class="font-heading text-lg font-bold text-white">PRODIGY SOCIETY</span>
+        </div>
+        <p class="mb-2">Tilottama College • Tilottama-2, Yogikuti, Rupandehi, Nepal</p>
+        <p>© 2026 PRODIGY SOCIETY. All Rights Reserved.</p>
+    </footer>
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightbox" class="fixed inset-0 bg-black/90 z-50 hidden justify-center items-center p-4" onclick="closeLightbox()">
+        <span class="absolute top-6 right-8 text-white text-4xl cursor-pointer">&times;</span>
+        <img id="lightbox-img" src="" class="max-w-full max-h-full rounded-2xl border border-white/20">
+    </div>
+
+    <!-- ADMIN PANEL MODAL -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/90 z-50 hidden justify-center items-center p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-4xl p-8 rounded-3xl relative my-8">
+            <span class="absolute top-6 right-8 text-white text-3xl cursor-pointer" onclick="toggleAdminModal()">&times;</span>
+            
+            <!-- Login State -->
+            <div id="admin-login-view" class="max-w-md mx-auto text-center py-8">
+                <h2 class="font-heading text-3xl font-extrabold text-primary mb-6">Admin Panel</h2>
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                    <input type="text" id="admin-user" placeholder="Username" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none">
+                    <input type="password" id="admin-pass" placeholder="Password" required class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none">
+                    <button type="submit" class="neon-btn w-full">Login</button>
+                </form>
+            </div>
+
+            <!-- Dashboard State -->
+            <div id="admin-dashboard-view" class="hidden">
+                <div class="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
+                    <h2 class="font-heading text-2xl font-bold text-primary"><i class="fa-solid fa-gauge mr-2"></i>Dashboard</h2>
+                    <button onclick="adminLogout()" class="px-4 py-1.5 bg-red-600/30 text-red-400 border border-red-500/30 rounded-lg text-sm">Logout</button>
+                </div>
+
+                <!-- Admin Tabs -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+                    <button onclick="switchAdminTab('members')" class="p-2 glass-card rounded-lg text-sm font-bold text-primary">Members</button>
+                    <button onclick="switchAdminTab('events')" class="p-2 glass-card rounded-lg text-sm font-bold text-primary">Events</button>
+                    <button onclick="switchAdminTab('gallery')" class="p-2 glass-card rounded-lg text-sm font-bold text-primary">Gallery</button>
+                    <button onclick="switchAdminTab('settings')" class="p-2 glass-card rounded-lg text-sm font-bold text-primary">Settings</button>
+                </div>
+
+                <!-- Tab: Add Member -->
+                <div id="admin-tab-members" class="admin-tab space-y-4">
+                    <h3 class="font-bold">Add Board Member</h3>
+                    <form onsubmit="adminAddMember(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="m-name" placeholder="Full Name" required class="p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        <select id="m-role" class="p-3 bg-black/40 border border-white/10 rounded-xl text-sm text-white">
+                            <option value="President">President</option>
+                            <option value="Vice President">Vice President</option>
+                            <option value="Secretary">Secretary</option>
+                            <option value="IT Head">IT Head</option>
+                            <option value="Graphic Designer">Graphic Designer</option>
+                        </select>
+                        <select id="m-dept" class="p-3 bg-black/40 border border-white/10 rounded-xl text-sm text-white">
+                            <option value="Executive">Executive</option>
+                            <option value="Technical">Technical</option>
+                            <option value="Media">Media</option>
+                        </select>
+                        
+                        <!-- Image File Upload Option -->
+                        <div class="col-span-full space-y-2">
+                            <label class="text-xs text-gray-400">Member Photo (Upload Image File or enter URL below)</label>
+                            <input type="file" id="m-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
+                            <input type="url" id="m-photo" placeholder="Or enter Photo URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        </div>
+
+                        <button type="submit" class="col-span-full py-3 bg-primary text-black font-bold rounded-xl">Publish Member</button>
+                    </form>
+                </div>
+
+                <!-- Tab: Add Event -->
+                <div id="admin-tab-events" class="admin-tab hidden space-y-4">
+                    <h3 class="font-bold">Add Event</h3>
+                    <form onsubmit="adminAddEvent(event)" class="space-y-3">
+                        <input type="text" id="e-title" placeholder="Event Title" required class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="e-date" placeholder="Date" required class="p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                            <input type="text" id="e-venue" placeholder="Venue" required class="p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        </div>
+                        
+                        <!-- Event Image Upload Option -->
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400">Event Cover Image (Upload Image File or enter URL below)</label>
+                            <input type="file" id="e-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
+                            <input type="url" id="e-photo" placeholder="Or enter Cover Image URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        </div>
+
+                        <textarea id="e-desc" placeholder="Event Description" rows="2" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm"></textarea>
+                        <button type="submit" class="w-full py-3 bg-primary text-black font-bold rounded-xl">Publish Event</button>
+                    </form>
+                </div>
+
+                <!-- Tab: Add Gallery Image -->
+                <div id="admin-tab-gallery" class="admin-tab hidden space-y-4">
+                    <h3 class="font-bold">Add Gallery Image</h3>
+                    <form onsubmit="adminAddGallery(event)" class="space-y-3">
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400">Gallery Image (Upload Image File or enter URL below)</label>
+                            <input type="file" id="g-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
+                            <input type="url" id="g-url" placeholder="Or enter Image URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        </div>
+                        <input type="text" id="g-caption" placeholder="Caption" required class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        <button type="submit" class="w-full py-3 bg-primary text-black font-bold rounded-xl">Add to Gallery</button>
+                    </form>
+                </div>
+
+                <!-- Tab: Settings -->
+                <div id="admin-tab-settings" class="admin-tab hidden space-y-4">
+                    <h3 class="font-bold">Change Website Background & Logo</h3>
+                    <form onsubmit="adminUpdateTheme(event)" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400">Upload New Campus Background Image</label>
+                            <input type="file" id="bg-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
+                            <input type="text" id="bg-url-input" value="tilottama-campus-building.webp" placeholder="Or enter Background Image URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400">Upload New Society Logo Image</label>
+                            <input type="file" id="logo-file" accept="image/*" class="w-full p-2 bg-black/40 border border-white/10 rounded-xl text-sm text-gray-300">
+                            <input type="text" id="logo-url-input" value="WhatsApp Image 2026-07-22 at 7.46.30 PM.jpeg" placeholder="Or enter Logo Image URL" class="w-full p-3 bg-black/40 border border-white/10 rounded-xl text-sm">
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-accent text-white font-bold rounded-xl">Apply Theme Updates</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        // Typing Effect Engine
+        const typingText = "PRODIGY SOCIETY";
+        let typeIdx = 0;
+        function typeWriter() {
+            if (typeIdx < typingText.length) {
+                document.getElementById("typing-text").innerHTML += typingText.charAt(typeIdx);
+                typeIdx++;
+                setTimeout(typeWriter, 120);
+            }
+        }
+
+        // Cursor Glow Engine
+        document.addEventListener('mousemove', (e) => {
+            const glow = document.getElementById('cursor-glow');
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+
+        // Initial Data Store
+        let state = {
+            members: [
+                { name: "Executive President", role: "President", dept: "Executive", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400" },
+                { name: "Executive Vice President", role: "Vice President", dept: "Executive", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" },
+                { name: "General Secretary", role: "Secretary", dept: "Executive", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400" },
+                { name: "IT Department Lead", role: "IT Head", dept: "Technical", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400" },
+                { name: "Creative Designer", role: "Graphic Designer", dept: "Media", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400" }
+            ],
+            events: [
+                { title: "3D Web Development Seminar", date: "August 12, 2026", venue: "Tilottama Campus Auditorium", photo: "tilottama-campus-building.webp", desc: "Interactive workshop on contemporary web architectures and 3D graphics." },
+                { title: "Prodigy CodeFest Hackathon", date: "September 02, 2026", venue: "Tilottama IT Lab", photo: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800", desc: "Collaborative coding contest for innovative student projects." }
+            ],
+            gallery: [
+                { url: "tilottama-campus-building.webp", title: "Tilottama Campus View" },
+                { url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800", title: "Student Excellence Meeting" },
+                { url: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=800", title: "Tech Workshop" }
+            ]
+        };
+
+        // Window Loader Init
+        window.addEventListener('load', () => {
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => document.getElementById('loader').style.visibility = 'hidden', 800);
+            typeWriter();
+            initThreeJS();
+            renderAll();
+            initCounters();
+        });
+
+        // Three.js Particle Background
+        function initThreeJS() {
+            const canvas = document.getElementById('bg-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const count = 600;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+
+            for (let i = 0; i < count * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 10;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({ size: 0.018, color: 0x00E5FF, transparent: true, opacity: 0.7 });
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+
+            camera.position.z = 3;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                points.rotation.y += 0.001;
+                points.rotation.x += 0.0005;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // Render Functions
+        function renderAll() {
+            renderMembers(state.members);
+            renderEvents();
+            renderGallery();
+        }
+
+        function renderMembers(list) {
+            const grid = document.getElementById('members-grid');
+            grid.innerHTML = list.map(m => `
+                <div class="glass-card p-6 rounded-3xl text-center" data-tilt>
+                    <img src="${m.photo}" alt="${m.name}" class="w-28 h-28 mx-auto rounded-full object-cover border-2 border-primary shadow-[0_0_15px_#00E5FF] mb-4">
+                    <span class="text-xs text-accent font-extrabold uppercase tracking-widest">${m.role}</span>
+                    <h3 class="font-heading text-xl font-bold mt-1">${m.name}</h3>
+                    <p class="text-gray-400 text-xs mt-1 uppercase tracking-wider">${m.dept} Department</p>
+                </div>
+            `).join('');
+            VanillaTilt.init(document.querySelectorAll('[data-tilt]'));
+        }
+
+        function filterMembers() {
+            const query = document.getElementById('member-search').value.toLowerCase();
+            const dept = document.getElementById('department-filter').value;
+
+            const filtered = state.members.filter(m => {
+                const matchesQuery = m.name.toLowerCase().includes(query) || m.role.toLowerCase().includes(query);
+                const matchesDept = dept === 'ALL' || m.dept === dept;
+                return matchesQuery && matchesDept;
+            });
+            renderMembers(filtered);
+        }
+
+        function renderEvents() {
+            const grid = document.getElementById('events-grid');
+            grid.innerHTML = state.events.map(e => `
+                <div class="glass-card rounded-3xl overflow-hidden flex flex-col md:flex-row">
+                    <img src="${e.photo}" class="w-full md:w-48 h-48 object-cover">
+                    <div class="p-6 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs text-primary font-bold">${e.date} • ${e.venue}</span>
+                            <h3 class="font-heading text-xl font-bold mt-1">${e.title}</h3>
+                            <p class="text-gray-400 text-sm mt-2">${e.desc}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = state.gallery.map(g => `
+                <div class="masonry-item glass-card rounded-2xl overflow-hidden group cursor-pointer" onclick="openLightbox('${g.url}')">
+                    <img src="${g.url}" class="w-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="p-3 text-center text-xs font-bold text-gray-300">${g.title}</div>
+                </div>
+            `).join('');
+        }
+
+        // Helper to Convert File Upload to Base64 Image String
+        function getFileData(fileInput, fallbackUrl) {
+            return new Promise((resolve) => {
+                if (fileInput.files && fileInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) { resolve(e.target.result); };
+                    reader.readAsDataURL(fileInput.files[0]);
+                } else {
+                    resolve(fallbackUrl);
+                }
+            });
+        }
+
+        // Lightbox
+        function openLightbox(url) {
+            document.getElementById('lightbox-img').src = url;
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.getElementById('lightbox').classList.add('flex');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+        }
+
+        // Counter Animation
+        function initCounters() {
+            document.querySelectorAll('.counter').forEach(c => {
+                const target = +c.getAttribute('data-target');
+                let count = 0;
+                const inc = target / 50;
+                const update = () => {
+                    count += inc;
+                    if (count < target) { c.innerText = Math.ceil(count); setTimeout(update, 30); }
+                    else { c.innerText = target; }
+                };
+                update();
+            });
+        }
+
+        // Admin Engine
+        function toggleAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+        }
+
+        if (window.location.hash === '#admin') toggleAdminModal();
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            // Secured Password
+            if (document.getElementById('admin-user').value === 'admin' && document.getElementById('admin-pass').value === 'Prodigy@2083') {
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-dashboard-view').classList.remove('hidden');
+            } else { alert('Invalid Username or Password!'); }
+        }
+
+        function adminLogout() {
+            document.getElementById('admin-login-view').classList.remove('hidden');
+            document.getElementById('admin-dashboard-view').classList.add('hidden');
+        }
+
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
+            document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+        }
+
+        async function adminAddMember(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('m-file');
+            const urlInput = document.getElementById('m-photo').value;
+            const photoSrc = await getFileData(fileInput, urlInput || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400');
+
+            state.members.push({
+                name: document.getElementById('m-name').value,
+                role: document.getElementById('m-role').value,
+                dept: document.getElementById('m-dept').value,
+                photo: photoSrc
+            });
+            renderMembers(state.members);
+            alert('Member Published Successfully!');
+        }
+
+        async function adminAddEvent(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('e-file');
+            const urlInput = document.getElementById('e-photo').value;
+            const photoSrc = await getFileData(fileInput, urlInput || 'tilottama-campus-building.webp');
+
+            state.events.push({
+                title: document.getElementById('e-title').value,
+                date: document.getElementById('e-date').value,
+                venue: document.getElementById('e-venue').value,
+                photo: photoSrc,
+                desc: document.getElementById('e-desc').value
+            });
+            renderEvents();
+            alert('Event Published Successfully!');
+        }
+
+        async function adminAddGallery(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('g-file');
+            const urlInput = document.getElementById('g-url').value;
+            const photoSrc = await getFileData(fileInput, urlInput || 'tilottama-campus-building.webp');
+
+            state.gallery.push({
+                url: photoSrc,
+                title: document.getElementById('g-caption').value
+            });
+            renderGallery();
+            alert('Photo Added to Gallery!');
+        }
+
+        async function adminUpdateTheme(e) {
+            e.preventDefault();
+            const bgFileInput = document.getElementById('bg-file');
+            const bgUrlInput = document.getElementById('bg-url-input').value;
+            const bgSrc = await getFileData(bgFileInput, bgUrlInput);
+
+            const logoFileInput = document.getElementById('logo-file');
+            const logoUrlInput = document.getElementById('logo-url-input').value;
+            const logoSrc = await getFileData(logoFileInput, logoUrlInput);
+
+            // Update Background & Logos
+            document.getElementById('campus-bg').style.backgroundImage = `url('${bgSrc}')`;
+            document.getElementById('nav-logo-img').src = logoSrc;
+            document.getElementById('hero-logo-img').src = logoSrc;
+
+            alert('Theme & Logos Updated Successfully!');
+        }
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            alert('Thank you! Your message has been received.');
+        }
+    </script>
+</body>
+</html>

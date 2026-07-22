@@ -44,7 +44,6 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        /* Glassmorphism Styles */
         .glass-card {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -56,7 +55,6 @@
             box-shadow: 0 0 30px rgba(0, 229, 255, 0.25);
         }
 
-        /* Cursor Glow Effect */
         #cursor-glow {
             position: fixed;
             width: 350px;
@@ -69,7 +67,6 @@
             transition: width 0.3s, height 0.3s;
         }
 
-        /* Custom Animated Buttons */
         .neon-btn {
             padding: 14px 36px;
             background: #00E5FF;
@@ -120,12 +117,10 @@
             border-radius: 0;
         }
 
-        /* Masonry Gallery */
         .masonry { column-count: 3; column-gap: 1.5rem; }
         @media(max-width: 768px) { .masonry { column-count: 1; } }
         .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
 
-        /* Loader */
         #loader {
             position: fixed; inset: 0; background: #050816; z-index: 10000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -188,7 +183,6 @@
             <a href="#events" class="liquid-btn px-8 py-3.5 glass-card rounded-full font-bold text-white border border-primary/40">Explore Events</a>
         </div>
 
-        <!-- Floating Icons / Shapes Effect -->
         <div class="absolute bottom-10 left-10 text-primary/30 text-4xl animate-pulse"><i class="fa-solid fa-cube"></i></div>
         <div class="absolute top-32 right-12 text-secondary/30 text-4xl animate-bounce"><i class="fa-solid fa-atom"></i></div>
     </section>
@@ -200,7 +194,6 @@
             <p class="text-gray-400 mt-2">Fostering Innovation, Leadership & Academic Excellence</p>
         </div>
 
-        <!-- Mission & Vision Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
             <div class="glass-card p-8 rounded-3xl" data-tilt>
                 <div class="text-primary text-3xl mb-4"><i class="fa-solid fa-bullseye"></i></div>
@@ -214,7 +207,6 @@
             </div>
         </div>
 
-        <!-- Statistics Counter -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div class="glass-card p-6 rounded-2xl text-center">
                 <div class="font-heading text-4xl font-extrabold text-primary counter" data-target="500">0</div>
@@ -254,7 +246,6 @@
             <p class="text-gray-400 mt-2">Meet the leadership team behind Prodigy Society</p>
         </div>
 
-        <!-- Search & Filter Controls -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-10 max-w-3xl mx-auto">
             <input type="text" id="member-search" oninput="filterMembers()" placeholder="Search member by name or role..." class="w-full md:w-2/3 p-3 rounded-full bg-black/40 border border-white/10 text-white outline-none focus:border-primary px-6">
             <select id="department-filter" onchange="filterMembers()" class="w-full md:w-1/3 p-3 rounded-full bg-black/40 border border-white/10 text-white outline-none focus:border-primary px-6">
@@ -303,11 +294,9 @@
                     <p class="flex items-center gap-4"><i class="fa-solid fa-envelope text-primary text-xl"></i> <a href="mailto:drewthecrewttc@gmail.com" class="underline">drewthecrewttc@gmail.com</a></p>
                 </div>
 
-                <!-- Google Maps Embed -->
                 <iframe class="w-full h-64 rounded-2xl border border-white/10" src="https://maps.google.com/maps?q=Tilottama%20Campus%20Yogikuti%20Rupandehi&t=&z=15&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no"></iframe>
             </div>
 
-            <!-- Contact Form -->
             <form class="space-y-4" onsubmit="handleContactSubmit(event)">
                 <h3 class="font-heading text-2xl font-bold mb-4">Send a Message</h3>
                 <div>
@@ -343,7 +332,7 @@
         <img id="lightbox-img" src="" class="max-w-full max-h-full rounded-2xl border border-white/20">
     </div>
 
-    <!-- HIDDEN ADMIN PANEL MODAL (Only accessed via URL #admin or Ctrl+Shift+A) -->
+    <!-- HIDDEN ADMIN PANEL MODAL (Accessed via URL #admin or Ctrl+Shift+A) -->
     <div id="admin-modal" class="fixed inset-0 bg-black/90 z-50 hidden justify-center items-center p-4 overflow-y-auto">
         <div class="glass-card w-full max-w-4xl p-8 rounded-3xl relative my-8">
             <span class="absolute top-6 right-8 text-white text-3xl cursor-pointer" onclick="closeAdminModal()">&times;</span>
@@ -365,7 +354,7 @@
                     <button onclick="adminLogout()" class="px-4 py-1.5 bg-red-600/30 text-red-400 border border-red-500/30 rounded-lg text-sm">Logout</button>
                 </div>
 
-                <!-- Admin Tabs -->
+                <!-- Admin Tabs Grid (6 Navigation Buttons) -->
                 <div class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-6">
                     <button onclick="switchAdminTab('patrons')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Patrons/Sirs</button>
                     <button onclick="switchAdminTab('members')" class="p-2 glass-card rounded-lg text-xs font-bold text-primary">Members</button>
@@ -472,7 +461,7 @@
                     <div id="admin-manage-gallery" class="space-y-2 max-h-48 overflow-y-auto"></div>
                 </div>
 
-                <!-- Tab: Settings (Theme & Logo) -->
+                <!-- Tab: Settings (Theme & Logo Update) -->
                 <div id="admin-tab-settings" class="admin-tab hidden space-y-4">
                     <h3 class="font-bold">Change Website Background & Logo</h3>
                     <form onsubmit="adminUpdateTheme(event)" class="space-y-4">
@@ -505,7 +494,6 @@
 
     <!-- JAVASCRIPT ENGINE -->
     <script>
-        // Typing Effect Engine
         const typingText = "PRODIGY SOCIETY";
         let typeIdx = 0;
         function typeWriter() {
@@ -516,7 +504,6 @@
             }
         }
 
-        // Cursor Glow Engine
         document.addEventListener('mousemove', (e) => {
             const glow = document.getElementById('cursor-glow');
             if (glow) {
@@ -525,7 +512,6 @@
             }
         });
 
-        // Initial Data Store
         let state = {
             patrons: [
                 { name: "Campus Chief / Director", designation: "Faculty Patron", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400", msg: "Guiding student excellence and technical initiative." },
@@ -550,7 +536,6 @@
             messages: []
         };
 
-        // Window Loader Init
         window.addEventListener('load', () => {
             document.getElementById('loader').style.opacity = '0';
             setTimeout(() => document.getElementById('loader').style.visibility = 'hidden', 800);
@@ -559,20 +544,17 @@
             renderAll();
             initCounters();
 
-            // Secret URL Hash Detector (#admin)
             if (window.location.hash === '#admin') {
                 openAdminModal();
             }
         });
 
-        // Secret Shortcut Key Trigger: Ctrl + Shift + A
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.shiftKey && e.key === 'A') {
                 openAdminModal();
             }
         });
 
-        // Three.js Particle Background
         function initThreeJS() {
             const canvas = document.getElementById('bg-canvas');
             if (!canvas) return;
@@ -611,7 +593,6 @@
             });
         }
 
-        // Render Functions
         function renderAll() {
             renderPatrons();
             renderMembers(state.members);
@@ -688,7 +669,6 @@
             `).join('');
         }
 
-        // Render Admin Management & Deletion Lists inside Dashboard
         function renderAdminManagementLists() {
             const pList = document.getElementById('admin-manage-patrons');
             if (pList) {
@@ -731,7 +711,6 @@
             }
         }
 
-        // Delete Handlers
         function deletePatron(index) {
             if (confirm("Are you sure you want to remove this advisor?")) {
                 state.patrons.splice(index, 1);
@@ -760,7 +739,6 @@
             }
         }
 
-        // Convert File Uploads to Base64
         function getFileData(fileInput, fallbackUrl) {
             return new Promise((resolve) => {
                 if (fileInput.files && fileInput.files[0]) {
@@ -773,7 +751,6 @@
             });
         }
 
-        // Theme and Logo Update Handler
         async function adminUpdateTheme(e) {
             e.preventDefault();
             const bgFileInput = document.getElementById('bg-file');
@@ -784,10 +761,8 @@
             const logoUrlInput = document.getElementById('logo-url-input').value;
             const newLogo = await getFileData(logoFileInput, logoUrlInput);
 
-            // Update Background
             document.getElementById('campus-bg').style.backgroundImage = `url('${newBg}')`;
 
-            // Update Logo Everywhere
             document.querySelectorAll('.dynamic-logo').forEach(img => {
                 img.src = newLogo;
             });
@@ -795,17 +770,16 @@
             alert('Theme & Logo updated successfully!');
         }
 
-        // Lightbox
         function openLightbox(url) {
             document.getElementById('lightbox-img').src = url;
             document.getElementById('lightbox').classList.remove('hidden');
             document.getElementById('lightbox').classList.add('flex');
         }
+
         function closeLightbox() {
             document.getElementById('lightbox').classList.add('hidden');
         }
 
-        // Counter Animation
         function initCounters() {
             document.querySelectorAll('.counter').forEach(c => {
                 const target = +c.getAttribute('data-target');
@@ -818,11 +792,6 @@
                 };
                 update();
             });
-        }
-
-        // Admin Engine
-        function toggleAdminModal() {
-            openAdminModal();
         }
 
         function openAdminModal() {
